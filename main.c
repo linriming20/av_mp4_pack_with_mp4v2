@@ -35,7 +35,10 @@ static int getNALU(FILE *fpVideo, unsigned char *pNaluData, int *startCodeLen);
  */
 static int getAdtsFrame(FILE *fpAudio, unsigned char *pAdtsFrameData);
 
-
+/* 参考网页自己实现的一个用于填充解码器的函数，用于`MP4SetTrackESConfiguration`传递参数
+ * 返回值: 16bit(le)用于解码的信息
+ */
+static short getAudioConfig(unsigned int sampleRate, unsigned int channels);
 
 void print_usage(const char *process)
 {
@@ -67,6 +70,7 @@ int main(int argc, char *argv[])
 	MP4FileHandle mp4Handler = 0;
 	MP4TrackId videoTrackId = 0;
 	MP4TrackId audioTrackId = 0;
+	short audioConfig = 0;
 
 	/* 判断输入参数 */
 	if(argc == 1)
@@ -142,7 +146,7 @@ int main(int argc, char *argv[])
 			   "input: \n"
 			   "\t audio file name: %s\n"
 			   "\t  - sample rate: %d Hz\n"
-			   "\t  - channels: %d (unused in this demo)\n"
+			   "\t  - channels: %d\n"
 			   "\t video file name: %s\n"
 			   "\t  - width: %d\n"
 			   "\t  - height: %d\n"
@@ -205,8 +209,13 @@ int main(int argc, char *argv[])
 	}
 	MP4SetAudioProfileLevel(mp4Handler, 0x2); // 0x02 ==> MPEG4 AAC LC
 
-	// 设置解码器(可选) : 参数可以从faac开源项目的`faacEncGetDecoderSpecificInfo`函数获取
-	//MP4SetTrackESConfiguration(mp4Fd, audioTrackId, ...);
+	// 设置音频编码信息(推荐填充上，否则部分播放器播放时没有声音) ，配置参数有两种方式获取：
+	//  - 从开源项目faac的`faacEncGetDecoderSpecificInfo`函数获取；
+	//  - 我们自己实现了一个，这样可以避免依赖于其他项目的程序代码。<=
+	audioConfig = getAudioConfig(audio_samplerate, audio_channels);
+	audioConfig = ((audioConfig & 0x00ff) << 8) | ((audioConfig >> 8) & 0x00ff);
+	DEBUG("audioConfig: 0x%04x\n", audioConfig);
+	MP4SetTrackESConfiguration(mp4Handler, audioTrackId, (const uint8_t*)&audioConfig, 2);
 #endif
 
 
@@ -242,6 +251,7 @@ int main(int argc, char *argv[])
 				MP4AddH264PictureParameterSet(mp4Handler, videoTrackId, pNaluData, naluDataLen);
 				break;
 			default:
+				/* 注：这部分应该要考虑start code是3字节还是4字节的情况 */
 				pBuf[0] = (naluDataLen >> 24) & 0xFF;
 				pBuf[1] = (naluDataLen >> 16) & 0xFF;
 				pBuf[2] = (naluDataLen >> 8) & 0xFF;
@@ -370,6 +380,36 @@ static int getAdtsFrame(FILE *fpAudio, unsigned char *pAdtsFrameData)
 	return adtsFrameLen;
 }
 
+static int GetSRIndex(unsigned int sampleRate)
+{
+   if (92017 <= sampleRate)return 0;
+   if (75132 <= sampleRate)return 1;
+   if (55426 <= sampleRate)return 2;
+   if (46009 <= sampleRate)return 3;
+   if (37566 <= sampleRate)return 4;
+   if (27713 <= sampleRate)return 5;
+   if (23004 <= sampleRate)return 6;
+   if (18783 <= sampleRate)return 7;
+   if (13856 <= sampleRate)return 8;
+   if (11502 <= sampleRate)return 9;
+   if (9391 <= sampleRate)return 10;
+
+   return 11;
+}
+
+static short getAudioConfig(unsigned int sampleRate, unsigned int channels)
+{
+	/* 参考: https://my.oschina.net/u/1177171/blog/494369
+	 * [5 bits AAC Object Type] [4 bits Sample Rate Index] [4 bits Channel Number] [3 bits 0]
+	 */
+
+#define	MAIN 1
+#define	LOW  2
+#define	SSR  3
+#define	LTP  4
+
+	return (LOW << 11) | (GetSRIndex(sampleRate) << 7) | (channels << 3);
+}
 
 
 #if 0

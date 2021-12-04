@@ -37,6 +37,23 @@ examples:
     ./mp4v2_demo --audio_file=./avfile/test2_44100_mono.aac --audio_samplerate=44100 --audio_channels=1 --video_file=./avfile/test2_960x544_25fps.h264 --video_width=960 --video_height=544 --video_fps=25 --output_mp4=./test2_out.mp4
 ```
 
+### 3. 参考文章
+
+ - [MP4格式详解_DONGHONGBAI的专栏-CSDN博客](https://blog.csdn.net/DONGHONGBAI/article/details/84401397)
+
+ - [mp4文件格式解析 - 简书](https://www.jianshu.com/p/529c3729f357)
+
+ - [从零开始写一个RTSP服务器（5）RTP传输AAC_JT同学的博客-CSDN博客](https://blog.csdn.net/weixin_42462202/article/details/98986535)
+
+ - [使用mp4v2封装H.264成mp4最简单示例_JT同学的博客-CSDN博客_mp4v2](https://blog.csdn.net/weixin_42462202/article/details/90108485)
+
+ - [使用mp4v2封装mp4_LiaoJunXiong的博客-CSDN博客](https://blog.csdn.net/weixin_43549602/article/details/84570642)
+
+ - [使用mp4v2将H264+AAC合成mp4文件 - 楚 - 博客园](https://www.cnblogs.com/chutianyao/archive/2012/04/13/2446140.html)
+
+ - [如何使用 MP4SetTrackESConfiguration mp4v2 - 李有常的个人空间 - OSCHINA - 中文开源技术交流社区](https://my.oschina.net/u/1177171/blog/494369)
+
+ - [如何使用MP4SetTrackESConfiguration_老衲不出家-CSDN博客](https://blog.csdn.net/tanningzhong/article/details/77527692)
 
 ### 附录（demo目录结构）
 
