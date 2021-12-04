@@ -182,46 +182,6 @@ int main(int argc, char *argv[])
 
 
 #ifdef ENABLE_VIDEO
-	/* MP4操作 3/8：添加H264视频track，设置视频格式，本程序是在已知SPS的一些数值时直接显式填充 */
-	videoTrackId = MP4AddH264VideoTrack(mp4Handler, TIMESCALE, TIMESCALE/video_fps,
-										video_width, video_height,
-										0x64, // sps[1] AVCProfileIndication
-										0x00, // sps[2] profile_compat
-										0x1F, // sps[3] AVCLevelIndication
-										3);   // 4 bytes length before each NAL unit
-	if (videoTrackId == MP4_INVALID_TRACK_ID)
-	{
-		printf("add h264 video track error!\n");
-		goto error_exit1;
-	}
-	MP4SetVideoProfileLevel(mp4Handler, 0x7F);
-#endif
-
-
-#ifdef ENABLE_AUDIO
-	/* MP4操作 4/8：添加音频track，设置音频格式 */
-	audioTrackId = MP4AddAudioTrack(mp4Handler, audio_samplerate, 1024,
-											MP4_MPEG4_AUDIO_TYPE);
-	if (audioTrackId == MP4_INVALID_TRACK_ID)
-	{
-		printf("add aac audio track error!\n");
-		goto error_exit1;
-	}
-	MP4SetAudioProfileLevel(mp4Handler, 0x2); // 0x02 ==> MPEG4 AAC LC
-
-	/* MP4操作 5/8：根据音频协议、采样率、声道设置音频参数 */
-	// 推荐都填充上，否则部分播放器播放时没有声音，配置参数有两种方式获取：
-	//  - 从开源项目faac的`faacEncGetDecoderSpecificInfo`函数获取；
-	//  - 我们自己实现了一个，这样可以避免依赖于其他项目的程序代码。<=
-	audioConfig = getAudioConfig(audio_samplerate, audio_channels);
-	audioConfig = ((audioConfig & 0x00ff) << 8) | ((audioConfig >> 8) & 0x00ff);
-	DEBUG("audioConfig: 0x%04x\n", audioConfig);
-	MP4SetTrackESConfiguration(mp4Handler, audioTrackId, (const uint8_t*)&audioConfig, 2);
-#endif
-
-
-#ifdef ENABLE_VIDEO
-	/* MP4操作 6/8：写视频 */
 	while(1)
 	{
 		int startCodeLen = 0;
@@ -245,7 +205,29 @@ int main(int argc, char *argv[])
 		
 		switch(naluType)
 		{
+			case 0x06: // SEI
+				// 不是必须的
+				break;
 			case 0x07: // SPS
+				static int fgNeedtoAddTrack = 1;
+				if (fgNeedtoAddTrack)
+				{
+					/* MP4操作 3/8：根据第一个SPS的数据添加H264视频track，设置视频格式 */
+					videoTrackId = MP4AddH264VideoTrack(mp4Handler, TIMESCALE, TIMESCALE/video_fps,
+														video_width, video_height,
+														pNaluData[1], // sps[1] AVCProfileIndication
+														pNaluData[2], // sps[2] profile_compat
+														pNaluData[3], // sps[3] AVCLevelIndication
+														3);           // 4 bytes length before each NAL unit
+					if (videoTrackId == MP4_INVALID_TRACK_ID)
+					{
+						printf("add h264 video track error!\n");
+						goto error_exit1;
+					}
+					MP4SetVideoProfileLevel(mp4Handler, 0x7F);
+					fgNeedtoAddTrack = 0;
+				}
+				/* MP4操作 4/8：写视频数据、包括SPS、PPS、IDR、SLICE... */
 				MP4AddH264SequenceParameterSet(mp4Handler, videoTrackId, pNaluData, naluDataLen);
 				break;
 			case 0x08: // PPS
@@ -266,6 +248,26 @@ int main(int argc, char *argv[])
 
 
 #ifdef ENABLE_AUDIO
+	/* MP4操作 5/8：添加音频track，设置音频格式 */
+	audioTrackId = MP4AddAudioTrack(mp4Handler, audio_samplerate, 1024,
+											MP4_MPEG4_AUDIO_TYPE);
+	if (audioTrackId == MP4_INVALID_TRACK_ID)
+	{
+		printf("add aac audio track error!\n");
+		goto error_exit1;
+	}
+	MP4SetAudioProfileLevel(mp4Handler, 0x2); // 0x02 ==> MPEG4 AAC LC
+
+	/* MP4操作 6/8：根据音频协议、采样率、声道设置音频参数 */
+	// 推荐都填充上，否则部分播放器播放时没有声音，配置参数有两种方式获取：
+	//  - 从开源项目faac的`faacEncGetDecoderSpecificInfo`函数获取；
+	//  - 我们自己实现了一个，这样可以避免依赖于其他项目的程序代码。<=
+	audioConfig = getAudioConfig(audio_samplerate, audio_channels);
+	audioConfig = ((audioConfig & 0x00ff) << 8) | ((audioConfig >> 8) & 0x00ff);
+	DEBUG("audioConfig: 0x%04x\n", audioConfig);
+	MP4SetTrackESConfiguration(mp4Handler, audioTrackId, (const uint8_t*)&audioConfig, 2);
+
+
 	/* MP4操作 7/8：写音频 */
 	while(1)
 	{
