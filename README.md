@@ -3,7 +3,7 @@
 
 本demo是使用的mp4v2来将h264、aac封装成mp4文件的，目前demo提供的.a静态库文件是在x86_64架构的Ubuntu16.04编译得到的，如果想在其他环境下测试demo，可以自行编译mp4v2并替换相应的库文件（libmp4v2.a）。
 
-注：目前生成的mp4文件能在potplayer、vlc上播放了，但个别播放器未能正常播放（没有声音），还需定位问题，问题解决后会在这里补充相应说明。
+~~注：目前生成的mp4文件能在potplayer、vlc上播放了，但个别播放器未能正常播放（没有声音），还需定位问题，问题解决后会在这里补充相应说明。~~ （问题已修复：代码里添加了音频参数的设置，修复版本：b600c79b76df295dedb2f30941a1984ae8c54034）
 
 
 ###  1. 编译
@@ -13,6 +13,8 @@ $ make
 ```
 
 如果想编译mp4v2，则可以参考以下步骤：
+
+mp4v2源码下载地址：[https://github.com/TechSmith/mp4v2](https://github.com/TechSmith/mp4v2)
 
 ```bash
 $ tar xjf mp4v2-2.0.0.tar.bz2
@@ -72,7 +74,9 @@ examples:
 │   ├── 从零开始写一个RTSP服务器（5）RTP传输AAC_JT同学的博客-CSDN博客.mhtml
 │   ├── 使用mp4v2封装H.264成mp4最简单示例_JT同学的博客-CSDN博客_mp4v2.mhtml
 │   ├── 使用mp4v2封装mp4_LiaoJunXiong的博客-CSDN博客.mhtml
-│   └── 使用mp4v2将H264+AAC合成mp4文件 - 楚 - 博客园.mhtml
+│   ├── 使用mp4v2将H264+AAC合成mp4文件 - 楚 - 博客园.mhtml
+│   ├── 如何使用 MP4SetTrackESConfiguration mp4v2 - 李有常的个人空间 - OSCHINA - 中文开源技术交流社区.mhtml
+│   └── 如何使用MP4SetTrackESConfiguration_老衲不出家-CSDN博客.mhtml
 ├── include
 │   └── mp4v2
 │       ├── chapter.h
@@ -91,8 +95,10 @@ examples:
 │       └── track_prop.h
 ├── lib
 │   └── libmp4v2.a
+├── main2.c
 ├── main.c
 ├── Makefile
 └── README.md
+
 ```
 

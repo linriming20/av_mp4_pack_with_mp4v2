@@ -13,6 +13,6 @@ $(TRAGET2) : main2.c lib/libmp4v2.a
 	$(CXX) $^ $(CFLAG) -o $@
 
 clean : 
-	rm -rf $(TRAGET) $(TRAGET2)
+	rm -rf $(TRAGET) $(TRAGET2) *.mp4
 .PHONY := clean
 
