@@ -30,13 +30,13 @@ $ make install
 注：示例2中的音视频测试文件是不同步的，所以封装得到的mp4文件音视频不同步是正常现象。
 
 ```bash
-$ ./mp4v2_demo
+$ ./mp4v2_pack_demo
 (Note: Only support H.264 and AAC(LC) in this demo.)
 examples:
-    ./mp4v2_demo -h
-    ./mp4v2_demo --help
-    ./mp4v2_demo -a ./avfile/test1_44100_stereo.aac -r 44100 -c 2 -v ./avfile/test1_856x480_24fps.h264 -W 856 -H 480 -f 24 -o ./test1_out.mp4
-    ./mp4v2_demo --audio_file=./avfile/test2_44100_mono.aac --audio_samplerate=44100 --audio_channels=1 --video_file=./avfile/test2_960x544_25fps.h264 --video_width=960 --video_height=544 --video_fps=25 --output_mp4=./test2_out.mp4
+    ./mp4v2_pack_demo -h
+    ./mp4v2_pack_demo --help
+    ./mp4v2_pack_demo -a ./avfile/test1_44100_stereo.aac -r 44100 -c 2 -v ./avfile/test1_856x480_24fps.h264 -W 856 -H 480 -f 24 -o ./test1_out.mp4
+    ./mp4v2_pack_demo --audio_file=./avfile/test2_44100_mono.aac --audio_samplerate=44100 --audio_channels=1 --video_file=./avfile/test2_960x544_25fps.h264 --video_width=960 --video_height=544 --video_fps=25 --output_mp4=./test2_out.mp4
 ```
 
 ### 3. 参考文章

@@ -1,5 +1,5 @@
-TRAGET := mp4v2_demo
-TRAGET2 := mp4v2_demo2
+TRAGET := mp4v2_pack_demo
+TRAGET2 := mp4v2_pack_demo2
 
 CXX := g++
 CFLAG := -I./include
