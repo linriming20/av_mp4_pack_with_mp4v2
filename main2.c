@@ -314,6 +314,8 @@ error_exit2:
 	fclose(fpVideo);
 	free(pBuf);
 
+	printf("\033[32mSuccess!\033[0m\n");
+
 	return 0;
 }
 
