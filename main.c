@@ -350,12 +350,17 @@ static int getNALU(FILE *fpVideo, unsigned char *pNaluData, int *startCodeLen)
 	// 查找下一个NALU
 	while(1)
 	{
-		if(feof(fpVideo))
+		int val = 0;
+		if((val = fgetc(fpVideo)) != EOF)
+		{
+			pNaluData[pos] = (unsigned char)val;
+		}
+		else
+		{
+			// 文件已结束，上一轮的循环末尾pos不应该被加1
+			pos -= 1;
 			break;
-
-
-		// 直到找到下一个NALU，或者在上面读完写数据就已经退出
-		pNaluData[pos] = fgetc(fpVideo);
+		}
 
 		// 判断“00 00 00 01”和“00 00 01”两种情况，必须先判断“00 00 00 01”，因为它包含了“00 00 01”这种情况
 		if(pNaluData[pos-3] == 0 && pNaluData[pos-2] == 0 && pNaluData[pos-1] == 0 && pNaluData[pos] == 1)
