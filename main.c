@@ -7,8 +7,8 @@
 #include "mp4v2/mp4v2.h"
 
 
-#define ENABLE_VIDEO
-#define ENABLE_AUDIO
+#define ENABLE_VIDEO 	1
+#define ENABLE_AUDIO 	1
 
 
 #define DEBUG(fmt, args...)
@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
 	MP4SetTimeScale(mp4Handler, TIMESCALE);
 
 
-#ifdef ENABLE_VIDEO
+#if ENABLE_VIDEO
 	/* MP4操作 3/8：添加H264视频track，设置视频格式，本程序是在已知SPS的一些数值时直接显式填充 */
 	videoTrackId = MP4AddH264VideoTrack(mp4Handler, TIMESCALE, TIMESCALE/video_fps,
 										video_width, video_height,
@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
 #endif
 
 
-#ifdef ENABLE_AUDIO
+#if ENABLE_AUDIO
 	/* MP4操作 4/8：添加音频track，设置音频格式 */
 	audioTrackId = MP4AddAudioTrack(mp4Handler, audio_samplerate, 1024,
 											MP4_MPEG4_AUDIO_TYPE);
@@ -215,12 +215,12 @@ int main(int argc, char *argv[])
 	//  - 我们自己实现了一个，这样可以避免依赖于其他项目的程序代码。<=
 	audioConfig = getAudioConfig(audio_samplerate, audio_channels);
 	audioConfig = ((audioConfig & 0x00ff) << 8) | ((audioConfig >> 8) & 0x00ff);
-	DEBUG("audioConfig: 0x%04x\n", audioConfig);
+	DEBUG("\n[audioConfig: 0x%04x]\n\n", audioConfig);
 	MP4SetTrackESConfiguration(mp4Handler, audioTrackId, (const uint8_t*)&audioConfig, 2);
 #endif
 
 
-#ifdef ENABLE_VIDEO
+#if ENABLE_VIDEO
 	/* MP4操作 6/8：写视频 */
 	while(1)
 	{
@@ -229,15 +229,16 @@ int main(int argc, char *argv[])
 		int naluDataLen = 0;
 		int naluType = 0;
 		unsigned char *pNaluData = NULL;
+		static unsigned int frameIndex = 1;
 
 		naluLen = getNALU(fpVideo, pBuf, &startCodeLen);
 		if(naluLen <= 0)
 			break;
 
-		DEBUG("start code: ");	
+		DEBUG("[\033[35mvideo\033[0m] start code: ");
 		for(int i = 0; i < startCodeLen; i++)
 			DEBUG("%02x ", pBuf[i]);
-		DEBUG("  type: %02x  length: %d\n", pBuf[startCodeLen], naluLen);
+		DEBUG("\t size: %d\t NALU type(%02x): ", naluLen, pBuf[startCodeLen]);
 
 		pNaluData = pBuf + startCodeLen; 	  // start code后边的NALU数据
 		naluDataLen = naluLen - startCodeLen; // NALU数据长度
@@ -245,38 +246,57 @@ int main(int argc, char *argv[])
 		
 		switch(naluType)
 		{
+			case 0x06: // SEI
+				// 不是必须的，暂不处理
+				DEBUG("SEI <Not write to file in this demo, skip it!>\n");
+				break;
 			case 0x07: // SPS
+				DEBUG("SPS\n");
 				MP4AddH264SequenceParameterSet(mp4Handler, videoTrackId, pNaluData, naluDataLen);
 				break;
 			case 0x08: // PPS
+				DEBUG("PPS\n");
 				MP4AddH264PictureParameterSet(mp4Handler, videoTrackId, pNaluData, naluDataLen);
 				break;
-			default:
-				/* 注：这部分应该要考虑start code是3字节还是4字节的情况 */
+			case 0x05: // IDR
+				/* 注：这里处理的默认是4字节的开始码，应考虑3字节还是4字节的情况 */
+				DEBUG("IDR\t frame index: %d\n", frameIndex++);
 				pBuf[0] = (naluDataLen >> 24) & 0xFF;
 				pBuf[1] = (naluDataLen >> 16) & 0xFF;
 				pBuf[2] = (naluDataLen >> 8) & 0xFF;
 				pBuf[3] = (naluDataLen >> 0) & 0xFF;
-				MP4WriteSample(mp4Handler, videoTrackId, pBuf, naluLen, MP4_INVALID_DURATION, 0, 1);
+				MP4WriteSample(mp4Handler, videoTrackId, pBuf, naluLen, MP4_INVALID_DURATION, 0, 1); // 最后一个参数: isSyncSample
+				break;
+			case 0x01: // SLICE
+				/* 注：这里处理的默认是4字节的开始码，应考虑3字节还是4字节的情况 */
+				DEBUG("SLICE\t frame index: %d\n", frameIndex++);
+				pBuf[0] = (naluDataLen >> 24) & 0xFF;
+				pBuf[1] = (naluDataLen >> 16) & 0xFF;
+				pBuf[2] = (naluDataLen >> 8) & 0xFF;
+				pBuf[3] = (naluDataLen >> 0) & 0xFF;
+				MP4WriteSample(mp4Handler, videoTrackId, pBuf, naluLen, MP4_INVALID_DURATION, 0, 0);
+				break;
+			default:
+				DEBUG("<Other NALU type, not write to file, skip it!>\n");
 				break;
 		}
-
 	}
 #endif
 
 
-#ifdef ENABLE_AUDIO
+#if ENABLE_AUDIO
 	/* MP4操作 7/8：写音频 */
 	while(1)
 	{
 		int aacFrameLen = 0;
+		static unsigned int frameIndex = 1;
 
 		aacFrameLen = getAdtsFrame(fpAudio, pBuf);
 		if(aacFrameLen <= 0)
 		{
 			break;
 		}
-		DEBUG("aacFrameLen = %d\n", aacFrameLen);
+		DEBUG("[\033[35maudio\033[0m] frame index = %d\t size = %d\n", frameIndex++, aacFrameLen);
 
 		MP4WriteSample(mp4Handler, audioTrackId, pBuf, aacFrameLen, MP4_INVALID_DURATION, 0, 1);
 	}
