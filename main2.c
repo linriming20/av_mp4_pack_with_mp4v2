@@ -193,7 +193,7 @@ int main(int argc, char *argv[])
 		int naluDataLen = 0;
 		int naluType = 0;
 		unsigned char *pNaluData = NULL;
-		static unsigned int frameIndex = 1;
+		static unsigned int frameIndex = 0; // 从0开始算起
 
 		naluLen = getNALU(fpVideo, pBuf, &startCodeLen);
 		if(naluLen <= 0)
@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
 		{
 			case 0x06: // SEI
 				// 不是必须的，暂不处理
-				DEBUG("SEI <Not write to file in this demo, skip it!>\n");
+				DEBUG("SEI <Do not pack to mp4 file in this demo, skip it>\n");
 				break;
 			case 0x07: // SPS
 				static int fgNeedtoAddTrack = 1;
@@ -260,7 +260,7 @@ int main(int argc, char *argv[])
 				MP4WriteSample(mp4Handler, videoTrackId, pBuf, naluLen, MP4_INVALID_DURATION, 0, 0);
 				break;
 			default:
-				DEBUG("<Other NALU type, not write to file, skip it!>\n");
+				DEBUG("Other NALU type <Do not pack to mp4 file in this demo, skip it!>\n");
 				break;
 		}
 	}
@@ -292,7 +292,7 @@ int main(int argc, char *argv[])
 	while(1)
 	{
 		int aacFrameLen = 0;
-		static unsigned int frameIndex = 1;
+		static unsigned int frameIndex = 0;
 
 		aacFrameLen = getAdtsFrame(fpAudio, pBuf);
 		if(aacFrameLen <= 0)
