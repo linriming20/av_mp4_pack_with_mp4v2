@@ -11,8 +11,12 @@
 #define ENABLE_AUDIO 	1
 
 
-#define DEBUG(fmt, args...)
-//#define DEBUG(fmt, args...) 	printf(fmt, ##args)
+// 编译时Makefile里控制
+#ifdef ENABLE_DEBUG
+	#define DEBUG(fmt, args...) 	printf(fmt, ##args)
+#else
+	#define DEBUG(fmt, args...)
+#endif
 
 
 #define TIMESCALE 	90000
@@ -280,7 +284,7 @@ int main(int argc, char *argv[])
 	//  - 我们自己实现了一个，这样可以避免依赖于其他项目的程序代码。<=
 	audioConfig = getAudioConfig(audio_samplerate, audio_channels);
 	audioConfig = ((audioConfig & 0x00ff) << 8) | ((audioConfig >> 8) & 0x00ff);
-	DEBUG("audioConfig: 0x%04x\n", audioConfig);
+	DEBUG("\naudioConfig: 0x%04x\n\n", audioConfig);
 	MP4SetTrackESConfiguration(mp4Handler, audioTrackId, (const uint8_t*)&audioConfig, 2);
 
 
@@ -295,7 +299,7 @@ int main(int argc, char *argv[])
 		{
 			break;
 		}
-		DEBUG("[\033[35maudio\033[0m] frame index = %d\t size = %d\n", frameIndex++, aacFrameLen);
+		DEBUG("[\033[36maudio\033[0m] frame index = %d\t size = %d\n", frameIndex++, aacFrameLen);
 
 		MP4WriteSample(mp4Handler, audioTrackId, pBuf, aacFrameLen, MP4_INVALID_DURATION, 0, 1);
 	}

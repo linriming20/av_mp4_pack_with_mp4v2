@@ -11,8 +11,12 @@
 #define ENABLE_AUDIO 	1
 
 
-#define DEBUG(fmt, args...)
-//#define DEBUG(fmt, args...) 	printf(fmt, ##args)
+// 编译时Makefile里控制
+#ifdef ENABLE_DEBUG
+	#define DEBUG(fmt, args...) 	printf(fmt, ##args)
+#else
+	#define DEBUG(fmt, args...)
+#endif
 
 
 #define TIMESCALE 	90000
@@ -296,7 +300,7 @@ int main(int argc, char *argv[])
 		{
 			break;
 		}
-		DEBUG("[\033[35maudio\033[0m] frame index = %d\t size = %d\n", frameIndex++, aacFrameLen);
+		DEBUG("[\033[36maudio\033[0m] frame index = %d\t size = %d\n", frameIndex++, aacFrameLen);
 
 		MP4WriteSample(mp4Handler, audioTrackId, pBuf, aacFrameLen, MP4_INVALID_DURATION, 0, 1);
 	}
