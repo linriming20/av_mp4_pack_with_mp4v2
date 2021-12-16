@@ -242,7 +242,7 @@ int main(int argc, char *argv[])
 				MP4AddH264PictureParameterSet(mp4Handler, videoTrackId, pNaluData, naluDataLen);
 				break;
 			case 0x05: // IDR
-				/* 注：这部分处理的默认是4字节的开始码，应考虑3字节还是4字节的情况 */
+				/* 注：这里处理的默认是4字节的开始码，应考虑3字节还是4字节的情况 */
 				DEBUG("IDR\t frame index: %d\n", frameIndex++);
 				pBuf[0] = (naluDataLen >> 24) & 0xFF;
 				pBuf[1] = (naluDataLen >> 16) & 0xFF;
@@ -251,7 +251,7 @@ int main(int argc, char *argv[])
 				MP4WriteSample(mp4Handler, videoTrackId, pBuf, naluLen, MP4_INVALID_DURATION, 0, 1); // 最后一个参数: isSyncSample
 				break;
 			case 0x01: // SLICE
-				/* 注：这部分处理的默认是4字节的开始码，应考虑3字节还是4字节的情况 */
+				/* 注：这里处理的默认是4字节的开始码，应考虑3字节还是4字节的情况 */
 				DEBUG("SLICE\t frame index: %d\n", frameIndex++);
 				pBuf[0] = (naluDataLen >> 24) & 0xFF;
 				pBuf[1] = (naluDataLen >> 16) & 0xFF;
@@ -299,7 +299,7 @@ int main(int argc, char *argv[])
 		{
 			break;
 		}
-		DEBUG("[\033[36maudio\033[0m] frame index = %d\t size = %d\n", frameIndex++, aacFrameLen);
+		DEBUG("[\033[36maudio\033[0m] frame index: %d\t size: %d\n", frameIndex++, aacFrameLen);
 
 		MP4WriteSample(mp4Handler, audioTrackId, pBuf, aacFrameLen, MP4_INVALID_DURATION, 0, 1);
 	}

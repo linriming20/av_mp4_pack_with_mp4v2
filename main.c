@@ -300,7 +300,7 @@ int main(int argc, char *argv[])
 		{
 			break;
 		}
-		DEBUG("[\033[36maudio\033[0m] frame index = %d\t size = %d\n", frameIndex++, aacFrameLen);
+		DEBUG("[\033[36maudio\033[0m] frame index: %d\t size: %d\n", frameIndex++, aacFrameLen);
 
 		MP4WriteSample(mp4Handler, audioTrackId, pBuf, aacFrameLen, MP4_INVALID_DURATION, 0, 1);
 	}
