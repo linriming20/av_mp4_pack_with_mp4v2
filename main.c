@@ -403,7 +403,7 @@ static int getAdtsFrame(FILE *fpAudio, unsigned char *pAdtsFrameData)
 					(((unsigned int)pAdtsFrameData[5] & 0xE0) >> 5);
 
 	// 读取7字节头部外的剩余的一帧ADTS数据
-	readBytes = fread(pAdtsFrameData, 1, adtsFrameLen-7, fpAudio);
+	readBytes = fread(pAdtsFrameData+7, 1, adtsFrameLen-7, fpAudio); // 偏移头部的7个字节继续写入
 	if(readBytes <= 0)
 	{
 		return -1;
