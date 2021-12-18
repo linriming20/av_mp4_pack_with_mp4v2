@@ -301,7 +301,8 @@ int main(int argc, char *argv[])
 		}
 		DEBUG("[\033[36maudio\033[0m] frame index: %d\t size: %d\n", frameIndex++, aacFrameLen);
 
-		MP4WriteSample(mp4Handler, audioTrackId, pBuf, aacFrameLen, MP4_INVALID_DURATION, 0, 1);
+		// 写入音频数据时不需要带上ADTS的头部，所以要偏移7个字节的头部
+		MP4WriteSample(mp4Handler, audioTrackId, pBuf+7, aacFrameLen-7, MP4_INVALID_DURATION, 0, 1);
 	}
 #endif
 
