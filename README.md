@@ -36,8 +36,32 @@ examples:
     ./mp4v2_pack_demo -h
     ./mp4v2_pack_demo --help
     ./mp4v2_pack_demo -a ./avfile/test1_44100_stereo.aac -r 44100 -c 2 -v ./avfile/test1_856x480_24fps.h264 -W 856 -H 480 -f 24 -o ./test1_out.mp4
-    ./mp4v2_pack_demo --audio_file=./avfile/test2_44100_mono.aac --audio_samplerate=44100 --audio_channels=1 --video_file=./avfile/test2_960x544_25fps.h264 --video_width=960 --video_height=544 --video_fps=25 --output_mp4=./test2_out.mp4
+    ./mp4v2_pack_demo --audio_file=./avfile/test2_44100_mono.aac --audio_samplerate=44100 --audio_channels=1 --video_file=./avfile/test2_640x360_20fps.h264 --video_width=640 --video_height=360 --video_fps=20 --output_mp4=./test2_out.mp4
 ```
+
+**目前合成视频的现象：**
+
+- test1_out.mp4（合成所用的H264含有I/P/**B**帧）：
+
+  - 电影和电视
+  - ACG播放器
+
+  （↑ 拖动进度条正常、但不流畅，大概率是因为该h264源数据含有B帧）
+
+  - VLC
+  - PotPlayer都能播放，
+
+  （↑ 拖动进度条、流畅度均正常）
+
+- test2_out.mp4（合成所用的H264含有I/P帧）：
+
+  - 电影和电视
+  - ACG播放器
+
+  - VLC
+  - PotPlayer
+
+  （↑ 拖动进度条、流畅度均正常）
 
 ### 3. 参考文章
 

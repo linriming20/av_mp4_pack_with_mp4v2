@@ -52,7 +52,7 @@ void print_usage(const char *process)
 		   "    %s --help\n"
 		   "    %s -a ./avfile/test1_44100_stereo.aac -r 44100 -c 2 -v ./avfile/test1_856x480_24fps.h264 -W 856 -H 480 -f 24 -o ./test1_out.mp4\n"
 		   "    %s --audio_file=./avfile/test2_44100_mono.aac --audio_samplerate=44100 --audio_channels=1 "
-		   "--video_file=./avfile/test2_960x544_25fps.h264 --video_width=960 --video_height=544 --video_fps=25 --output_mp4=./test2_out.mp4\n",
+		   "--video_file=./avfile/test2_640x360_20fps.h264 --video_width=640 --video_height=360 --video_fps=20 --output_mp4=./test2_out.mp4\n",
 		   process, process, process, process);
 }
 
